@@ -17,16 +17,27 @@
     sitetype: 'SM'
   };
 
-  /* ---------- dataLayer helper ---------- */
+  /* ---------- static dataLayer (no event pushes) ---------- */
   window.dataLayer = window.dataLayer || [];
-  // track(): pushes an event; undefined/null props are omitted (e.g. price when listing has none)
+
+  /* ---------- trk prefill: everything the page knows at load time lives on trk ---------- */
+  var sp = new URLSearchParams(location.search), all = window.LISTINGS || [];
+  function setIf(k, v) { if (v !== undefined && v !== null && v !== '') trk[k] = v; }
+  if (P.pagename === 'vdp') {
+    var cur = all.filter(function (l) { return l.id === (sp.get('id') || 'L-1001'); })[0] || all[0];
+    setIf('listing_id', cur.id); setIf('make', cur.make); setIf('model', cur.model); setIf('year', cur.year);
+    setIf('price', cur.price === null ? undefined : cur.price);   // omitted when no price
+    setIf('condition', cur.condition); setIf('listing_type', cur.type);
+  }
+  if (P.pagename === 'search') {
+    var found = window.searchListings({ q: sp.get('q'), type: sp.get('type'), make: sp.get('make'), max: sp.get('max'), sort: sp.get('sort') });
+    setIf('search_term', sp.get('q')); trk.result_count = found.length; setIf('filter_type', sp.get('type')); setIf('filter_make', sp.get('make'));
+    setIf('filter_max_price', +sp.get('max') || undefined); trk.sort = sp.get('sort') || 'relevance'; trk.page_number = +sp.get('page') || 1;
+  }
+  // track(): kept as a state setter only. It never pushes to the dataLayer. Only these results update trk.
+  var STATE = { lead_submitted: ['lead_ref'], ad_submitted: ['ad_ref'], login_succeeded: ['user_id'], account_created: ['user_id'], payment_calculated: ['monthly_payment'] };
   window.track = function (event, props) {
-    var o = { event: event };
-    Object.keys(props || {}).forEach(function (k) {
-      if (props[k] !== undefined && props[k] !== null) o[k] = props[k];
-    });
-    window.dataLayer.push(o);
-    return o;
+    (STATE[event] || []).forEach(function (k) { if (props && props[k] !== undefined) trk[k] = props[k]; });
   };
 
   /* ---------- Fullstory simulator ---------- */
@@ -68,13 +79,6 @@
   window.__loadGTM = loadGTM;
   loadGTM(GTM_ID);
 
-  // page_view fires for every page, right after the container loads
-  window.track('page_view', {
-    pagename: trk.pagename, channel: trk.channel, statename: trk.statename, statecode: trk.statecode,
-    city: trk.city, zipcode: trk.zipcode, dma: trk.dma, canary: trk.canary, sitetype: trk.sitetype,
-    page_url: location.href, page_path: location.pathname, page_title: document.title
-  });
-
   /* ---------- small utilities ---------- */
   window.fmtPrice = function (p) { return p ? '$' + p.toLocaleString('en-US') : 'Call for price'; };
   window.esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); };
@@ -110,19 +114,6 @@
     }
     panel();
   }
-
-  /* generic [data-track] click listener */
-  document.addEventListener('click', function (e) {
-    var el = e.target.closest && e.target.closest('[data-track]');
-    if (!el) return;
-    var href = el.getAttribute('href') || undefined;
-    track('element_click', {
-      click_id: el.getAttribute('data-track'),
-      click_text: (el.textContent || '').trim().slice(0, 60),
-      click_url: href ? el.href : undefined,
-      click_outbound: href ? (el.hostname !== location.hostname) : undefined
-    });
-  }, true);
 
   /* ---------- test-harness panel (GTM loader + Fullstory call log) ---------- */
   var logBody, logWrap, pill, gtmStatus;

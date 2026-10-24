@@ -13,3 +13,16 @@ window.LISTINGS = [
   { id: 'L-2005', type: 'boat', make: 'Bennington', model: '20 SLV Pontoon',   year: 2020, price: 33400, condition: 'Used', city: 'Hebron', state: 'OH', phone: '(740) 555-0205', mileage: 0 },
   { id: 'L-2006', type: 'boat', make: 'Chaparral', model: '257 SSX',           year: 2019, price: 61500, condition: 'Used', city: 'Port Clinton', state: 'OH', phone: '(419) 555-0206', mileage: 0 }
 ];
+
+// Shared search logic (used by site.js to prefill trk, and by pages.js to render)
+window.searchListings = function (p) {
+  var q = (p.q || '').toLowerCase(), type = p.type || '', make = p.make || '', max = +p.max || 0, sort = p.sort || 'relevance';
+  var res = window.LISTINGS.filter(function (l) {
+    var t = (l.year + ' ' + l.make + ' ' + l.model + ' ' + l.type).toLowerCase();
+    return (!q || t.indexOf(q) > -1) && (!type || l.type === type) && (!make || l.make === make) && (!max || (l.price !== null && l.price <= max));
+  });
+  if (sort === 'price_asc') res.sort(function (a, b) { return (a.price || 1e9) - (b.price || 1e9); });
+  if (sort === 'price_desc') res.sort(function (a, b) { return (b.price || 0) - (a.price || 0); });
+  if (sort === 'year_desc') res.sort(function (a, b) { return b.year - a.year; });
+  return res;
+};

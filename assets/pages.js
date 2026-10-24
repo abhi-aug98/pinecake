@@ -13,12 +13,12 @@
   try { saved = JSON.parse(safeStore.get('pw_saved') || '{}'); } catch (e) { saved = {}; }
 
   function card(l, placement, pos) {
-    return '<article class="card" data-id="' + l.id + '" data-placement="' + placement + '" data-pos="' + pos + '">' +
-      '<a class="thumb ' + l.type + '" href="listing.html?id=' + l.id + '" data-listing-link aria-label="' + esc(title(l)) + '">' + (l.type === 'rv' ? '🚐' : '🚤') + '</a>' +
-      '<div class="body"><h3><a href="listing.html?id=' + l.id + '" data-listing-link>' + esc(title(l)) + '</a></h3>' +
+    return '<article class="card" data-id="' + l.id + '" data-listing-id="' + l.id + '" data-make="' + esc(l.make) + '"' + (l.price ? ' data-price="' + l.price + '"' : '') + ' data-placement="' + placement + '" data-position="' + pos + '" data-pos="' + pos + '">' +
+      '<a class="thumb ' + l.type + '" href="listing.html?id=' + l.id + '" data-listing-link data-track="listing-card-image" data-listing-id="' + l.id + '" aria-label="' + esc(title(l)) + '">' + (l.type === 'rv' ? '🚐' : '🚤') + '</a>' +
+      '<div class="body"><h3><a href="listing.html?id=' + l.id + '" data-listing-link data-track="listing-card-title" data-listing-id="' + l.id + '">' + esc(title(l)) + '</a></h3>' +
       '<p class="price">' + fmtPrice(l.price) + '</p><p class="loc">' + esc(l.city + ', ' + l.state) + ' · ' + l.condition + '</p>' +
-      '<div class="actions"><button type="button" class="ghost save" aria-pressed="' + !!saved[l.id] + '">' + (saved[l.id] ? '♥ Saved' : '♡ Save') + '</button>' +
-      '<button type="button" class="ghost reveal-phone" data-placement="' + placement + '">Show phone</button></div></div></article>';
+      '<div class="actions"><button type="button" class="ghost save" data-track="save-listing" data-listing-id="' + l.id + '" aria-pressed="' + !!saved[l.id] + '">' + (saved[l.id] ? '♥ Saved' : '♡ Save') + '</button>' +
+      '<button type="button" class="ghost reveal-phone" data-track="phone-reveal" data-listing-id="' + l.id + '" data-placement="' + placement + '">Show phone</button></div></div></article>';
   }
 
   /* shared delegated handlers for listing cards (search results + similar listings) */
@@ -71,12 +71,7 @@
     $('f-q').value = qs('q') || ''; $('f-type').value = type; $('f-max').value = max || '';
     $('f-make').innerHTML = '<option value="">Any make</option>' + makes.map(function (m) { return '<option' + (m === make ? ' selected' : '') + '>' + m + '</option>'; }).join('');
     $('sort').value = sort;
-    var res = L.filter(function (l) {
-      return (!q || (title(l) + ' ' + l.type).toLowerCase().indexOf(q) > -1) && (!type || l.type === type) && (!make || l.make === make) && (!max || (l.price !== null && l.price <= max));
-    });
-    if (sort === 'price_asc') res.sort(function (a, b) { return (a.price || 1e9) - (b.price || 1e9); });
-    if (sort === 'price_desc') res.sort(function (a, b) { return (b.price || 0) - (a.price || 0); });
-    if (sort === 'year_desc') res.sort(function (a, b) { return b.year - a.year; });
+    var res = searchListings({ q: qs('q'), type: type, make: make, max: max, sort: sort });
     var pages = Math.max(1, Math.ceil(res.length / PER)), slice = res.slice((pg - 1) * PER, pg * PER);
     $('count').textContent = res.length + ' result' + (res.length === 1 ? '' : 's');
     $('results').innerHTML = slice.length ? slice.map(function (l, i) { return card(l, 'search', (pg - 1) * PER + i + 1); }).join('') : '<p>No listings match. Try removing a filter.</p>';
@@ -121,7 +116,7 @@
       track('gallery_interaction', { listing_id: l.id, action: b.classList.contains('next') ? 'next' : 'prev', image_index: idx + 1, image_count: imgs.length });
     });
     // main phone reveal
-    var pb = $('main-phone');
+    var pb = $('main-phone'); pb.dataset.listingId = l.id; pb.dataset.placement = 'main';
     pb.addEventListener('click', function () { pb.textContent = l.phone; pb.disabled = true; track('phone_revealed', { listing_id: l.id, placement: 'main' }); });
     // save / share
     var sv = $('save'); function drawS() { sv.textContent = saved[l.id] ? '♥ Saved' : '♡ Save'; }
@@ -155,7 +150,7 @@
           track('lead_failed', { listing_id: l.id, error_type: 'server' }); return;
         }
         var ref = 'PW-' + Math.random().toString(36).slice(2, 8).toUpperCase();
-        form.hidden = true; $('lead-ok').hidden = false; $('lead-ref').textContent = ref;
+        form.hidden = true; $('lead-ok').hidden = false; $('lead-ref').textContent = ref; $('lead-ok').dataset.leadRef = ref; $('lead-ok').dataset.listingId = l.id;
         track('lead_submitted', { listing_id: l.id, lead_ref: ref, make: l.make, price: l.price === null ? undefined : l.price });
       }, 600);
     });
@@ -187,7 +182,7 @@
       var em = $('a-email').value.trim();
       if (!/^\S+@\S+\.\S+$/.test(em)) { $('sell-err').textContent = 'Enter a valid email.'; track('sell_step_failed', { step: 3, step_name: 'contact', error_field: 'a-email' }); return; }
       var ref = 'AD-' + Math.random().toString(36).slice(2, 8).toUpperCase(), price = +data['a-price'] || undefined;
-      $('sell-form').hidden = true; $('sell-ok').hidden = false; $('ad-ref').textContent = ref;
+      $('sell-form').hidden = true; $('sell-ok').hidden = false; $('ad-ref').textContent = ref; $('sell-ok').dataset.adRef = ref;
       track('ad_submitted', { ad_ref: ref, listing_type: data['a-type'], make: data['a-make'], price: price });
     });
     show();
