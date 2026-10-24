@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Listing | Pinewake Exchange (fictional test site)</title>
+<link rel="stylesheet" href="assets/style.css">
+<script>window.PAGE = { pagename: 'vdp', channel: 'find' };</script>
+<script src="assets/data.js"></script>
+<script src="assets/site.js"></script>
+</head>
+<body>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P52KNDDB" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<div id="site-header"></div>
+<main class="wrap">
+<p><a href="search.html" data-track="back-to-results">&larr; Back to results</a></p>
+<div class="vdp"><section><div id="gallery" class="gallery"><span id="g-emoji"></span><button type="button" class="prev" aria-label="Previous photo">&lsaquo;</button><button type="button" class="next" aria-label="Next photo">&rsaquo;</button><span class="cap" id="g-cap"></span></div>
+<div class="panel" style="margin-top:16px"><h2>Details</h2><table class="specs"><tbody id="specs"></tbody></table></div>
+<div class="panel" id="calc-panel"><h2>Payment calculator</h2><p class="muted">Price: <span id="calc-price"></span></p>
+<form id="calc"><div class="f"><label for="down">Down payment ($)</label><input id="down" type="number" min="0" value="5000"></div>
+<div class="f"><label for="term">Term</label><select id="term"><option value="60">60 months</option><option value="120" selected>120 months</option><option value="180">180 months</option></select></div>
+<div class="f"><label for="apr">APR (%)</label><input id="apr" type="number" step="0.1" min="0" value="7.5"></div>
+<button type="submit">Calculate</button> <strong id="calc-out" role="status"></strong></form></div></section>
+<aside><div class="panel"><h1 id="title" style="font-size:26px"></h1><p class="price" style="font-size:24px" id="price"></p>
+<p><button type="button" id="main-phone" class="reveal-phone">Show phone number</button> <button type="button" id="save" class="ghost">&#9825; Save</button> <button type="button" id="share" class="ghost">Share</button></p></div>
+<div class="panel"><h2>Contact seller</h2>
+<form id="lead" novalidate><div class="f"><label for="l-name">Name</label><input id="l-name" autocomplete="name"></div>
+<div class="f"><label for="l-email">Email</label><input id="l-email" type="email" autocomplete="email"><span class="muted" style="font-size:12px">Tip: an email ending in @fail.test simulates a server error.</span></div>
+<div class="f"><label for="l-msg">Message</label><textarea id="l-msg" rows="3">Is this still available?</textarea></div>
+<button type="submit" id="lead-btn">Send message</button> <p id="lead-msg" role="status"></p></form>
+<div id="lead-ok" hidden><p class="ok">Message sent!</p><p>Your reference number: <strong id="lead-ref"></strong></p></div></div></aside></div>
+<h2>Similar listings</h2><div id="similar" class="grid"></div>
+</main>
+<div id="site-footer"></div>
+<script src="assets/pages.js"></script>
+</body>
+</html>

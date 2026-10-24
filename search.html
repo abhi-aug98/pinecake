@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search | Pinewake Exchange (fictional test site)</title>
+<link rel="stylesheet" href="assets/style.css">
+<script>window.PAGE = { pagename: 'search', channel: 'find' };</script>
+<script src="assets/data.js"></script>
+<script src="assets/site.js"></script>
+</head>
+<body>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P52KNDDB" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<div id="site-header"></div>
+<main class="wrap">
+<h1>Search listings</h1>
+<div class="layout"><form id="filters" class="filters"><div><label for="f-q">Keyword</label><input id="f-q"></div>
+<div><label for="f-type">Type</label><select id="f-type"><option value="">All</option><option value="rv">RVs</option><option value="boat">Boats</option></select></div>
+<div><label for="f-make">Make</label><select id="f-make"></select></div>
+<div><label for="f-max">Max price ($)</label><input id="f-max" type="number" min="0" step="1000"></div>
+<button type="submit">Apply</button></form>
+<section><div class="toolbar"><strong id="count"></strong><label>Sort <select id="sort"><option value="relevance">Relevance</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option><option value="year_desc">Newest year</option></select></label></div>
+<div id="results" class="grid"></div><div id="pager" class="pager"></div></section></div>
+</main>
+<div id="site-footer"></div>
+<script src="assets/pages.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sell | Pinewake Exchange (fictional test site)</title>
+<link rel="stylesheet" href="assets/style.css">
+<script>window.PAGE = { pagename: 'sell', channel: 'sell' };</script>
+<script src="assets/data.js"></script>
+<script src="assets/site.js"></script>
+</head>
+<body>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P52KNDDB" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<div id="site-header"></div>
+<main class="wrap">
+<h1>Sell your RV or boat</h1>
+<div class="steps"><span id="st1">1. Vehicle</span><span id="st2">2. Details</span><span id="st3">3. Contact</span></div>
+<form id="sell-form" class="panel" novalidate>
+<div id="s1"><div class="f"><label for="a-type">Type</label><select id="a-type" required data-label="Type"><option value="">Select…</option><option value="rv">RV</option><option value="boat">Boat</option></select></div>
+<div class="f"><label for="a-make">Make</label><input id="a-make" required data-label="Make"></div><div class="f"><label for="a-year">Year</label><input id="a-year" type="number" required data-label="Year"></div>
+<button type="button" data-next>Next</button></div>
+<div id="s2" hidden><div class="f"><label for="a-price">Asking price ($)</label><input id="a-price" type="number" min="0" required data-label="Asking price"></div>
+<div class="f"><label for="a-desc">Description</label><input id="a-desc"></div><button type="button" class="ghost" data-back>Back</button> <button type="button" data-next>Next</button></div>
+<div id="s3" hidden><div class="f"><label for="a-email">Email</label><input id="a-email" type="email"></div><button type="button" class="ghost" data-back>Back</button> <button type="submit">Submit ad</button></div>
+<p id="sell-err" class="err" role="alert"></p></form>
+<div id="sell-ok" class="panel" hidden><p class="ok">Your ad was submitted.</p><p>Ad reference: <strong id="ad-ref"></strong></p></div>
+</main>
+<div id="site-footer"></div>
+<script src="assets/pages.js"></script>
+</body>
+</html>
