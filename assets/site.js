@@ -1,7 +1,7 @@
 /* Pinewake Exchange Tracking Lab - core: trk object, dataLayer, GTM loader, Fullstory simulator, shared chrome */
 (function () {
   'use strict';
-  var GTM_ID = 'GTM-P52KNDDB';
+  var GTM_ID = 'GTM-M5HQ3Z9K';
   var P = window.PAGE || {};
 
   /* ---------- trk object (same shape as the original test site) ---------- */

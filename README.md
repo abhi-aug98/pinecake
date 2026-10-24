@@ -1,7 +1,7 @@
 # Pinewake Exchange – Tracking Lab (fictional test site)
 
 Static mock marketplace for practising GTM + dataLayer + Fullstory implementation.
-GTM container: **GTM-P52KNDDB** (loaded on every page; the harness panel can load another for testing).
+GTM container: **GTM-M5HQ3Z9K** (loaded on every page; the harness panel can load another for testing).
 Hosted on GitHub Pages, no build step.
 
 ## Page object `window.trk`
