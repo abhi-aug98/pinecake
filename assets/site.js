@@ -41,11 +41,16 @@
   };
 
   /* ---------- Fullstory simulator ---------- */
-  var fsLog = [];
+  // The log survives page loads (sessionStorage) so click events are still visible after navigation.
+  var LOG_KEY = 'pw_fslog', KEEP_KEY = 'pw_fslog_keep', fsLog = [];
+  function store(op, k, v) { try { return op === 'get' ? sessionStorage.getItem(k) : op === 'set' ? sessionStorage.setItem(k, v) : sessionStorage.removeItem(k); } catch (e) { return null; } }
+  var keep = store('get', KEEP_KEY) !== '0';
+  if (keep) { try { fsLog = JSON.parse(store('get', LOG_KEY) || '[]'); } catch (e) { fsLog = []; } } else { store('del', LOG_KEY); }
+  function persist() { store('set', LOG_KEY, JSON.stringify(fsLog.slice(-500))); }
   window.__fsLog = fsLog;
   function fsRecord(method, payload) {
-    var entry = { t: new Date().toISOString().slice(11, 23), method: method, payload: payload };
-    fsLog.push(entry);
+    var entry = { t: new Date().toISOString().slice(11, 23), page: location.pathname.split('/').pop() || 'index.html', method: method, payload: payload };
+    fsLog.push(entry); persist();
     if (window.console && console.info) console.info('[FS sim]', method, payload);
     renderLogEntry(entry);
   }
@@ -116,10 +121,13 @@
   }
 
   /* ---------- test-harness panel (GTM loader + Fullstory call log) ---------- */
-  var logBody, logWrap, pill, gtmStatus;
+  var logBody, logWrap, pill, gtmStatus, lastPage;
   function renderLogEntry(entry) {
     if (!logBody) return;
     var empty = logBody.querySelector('.empty'); if (empty) empty.remove();
+    if (entry.page && entry.page !== lastPage) {
+      var sep = document.createElement('div'); sep.className = 'sep'; sep.textContent = '\u2192 ' + entry.page; logBody.appendChild(sep); lastPage = entry.page;
+    }
     var d = document.createElement('div'); d.className = 'entry';
     d.innerHTML = '<b>' + entry.t + '</b> <code>' + esc(entry.method) + '</code><pre>' + esc(JSON.stringify(entry.payload, null, 2)) + '</pre>';
     logBody.appendChild(d); logBody.scrollTop = logBody.scrollHeight;
@@ -130,7 +138,7 @@
       '<div class="gtm"><strong>Test harness GTM:</strong> <span id="gtm-status">loaded (' + GTM_ID + ')</span>' +
       '<div class="row"><label for="gtm-id">Container ID</label><input id="gtm-id" value="' + GTM_ID + '" spellcheck="false"><button id="gtm-load" type="button">Load</button></div></div>' +
       '<div class="fs" id="fs-wrap"><div class="fs-head"><strong>Fullstory calls (simulated)</strong>' +
-      '<span><button type="button" id="fs-copy">Copy log</button><button type="button" id="fs-clear">Clear</button><button type="button" id="fs-hide">Hide</button><button type="button" id="fs-close">Close</button></span></div>' +
+      '<span><label class="keep"><input type="checkbox" id="fs-keep"' + (keep ? ' checked' : '') + '> Preserve log</label><button type="button" id="fs-copy">Copy log</button><button type="button" id="fs-clear">Clear</button><button type="button" id="fs-hide">Hide</button><button type="button" id="fs-close">Close</button></span></div>' +
       '<div class="fs-body" id="fs-body"><div class="empty">No Fullstory calls yet</div></div></div>';
     document.body.appendChild(box);
     pill = document.createElement('button'); pill.id = 'fs-pill'; pill.type = 'button'; pill.textContent = 'Show harness'; pill.hidden = true; document.body.appendChild(pill);
@@ -141,7 +149,8 @@
       if (!/^GTM-[A-Z0-9]{4,}$/.test(id)) { gtmStatus.textContent = 'invalid container ID'; return; }
       gtmStatus.textContent = loadGTM(id) ? 'loaded (' + id + ')' : 'already loaded (' + id + ')';
     };
-    document.getElementById('fs-clear').onclick = function () { fsLog.length = 0; logBody.innerHTML = '<div class="empty">No Fullstory calls yet</div>'; };
+    document.getElementById('fs-clear').onclick = function () { fsLog.length = 0; persist(); lastPage = undefined; logBody.innerHTML = '<div class="empty">No Fullstory calls yet</div>'; };
+    document.getElementById('fs-keep').onchange = function () { store('set', KEEP_KEY, this.checked ? '1' : '0'); if (this.checked) persist(); };
     document.getElementById('fs-copy').onclick = function () {
       var txt = JSON.stringify(fsLog, null, 2);
       (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).catch(function () {

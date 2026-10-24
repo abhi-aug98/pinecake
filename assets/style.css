@@ -36,3 +36,5 @@ details{background:var(--card);border:1px solid var(--line);border-radius:10px;p
 #harness .fs-head{display:flex;justify-content:space-between;align-items:center;padding:8px 12px}.fs-body{max-height:230px;overflow:auto;padding:0 12px 10px}
 .fs-body .empty{color:#8fa399}.entry{border-top:1px solid #26332d;padding:5px 0}.entry pre{margin:2px 0 0;white-space:pre-wrap;word-break:break-word;color:#b9e3cc;font-size:12px}
 #fs-pill{position:fixed;right:12px;bottom:12px;z-index:99999;padding:6px 14px;border-radius:99px;background:#101614}
+
+#harness .keep{font-size:12px;margin-right:6px;white-space:nowrap}#harness .keep input{width:auto;margin-right:3px;vertical-align:middle}.fs-body .sep{margin:6px 0 2px;padding-top:4px;border-top:1px dashed #4a5f55;color:#8fa399;font-size:11px}
